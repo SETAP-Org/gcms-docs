@@ -15,5 +15,9 @@ Contents
 
 .. toctree::
 
+   installation
    usage
+   architecture
    api
+   contributing
+   changelog
