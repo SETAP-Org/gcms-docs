@@ -1,5 +1,5 @@
-API
-===
+Architecture
+============
 
 1 page, diagrams optional:
 
