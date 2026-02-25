@@ -4,7 +4,7 @@ Welcome to Group Coursework Management System (GCMS)'s documentation!
 **GCMS** is a web application to help students manage their group coursework projects.
 
 Check out the :doc:`usage` section for further information, including
-how to :ref:`installation` the project. :doc:`architecture` :ref:`contents`
+how to :ref:`installation` the project. :doc:`architecture` :ref:`text`
 
 .. note::
 

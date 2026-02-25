@@ -9,5 +9,6 @@ frontend vs backend
 
 key external APIs (Microsoft Graph, OpenAI)
 
-.. autosummary::
-   :toctree: generated
+Text
+----
+This is a new section
