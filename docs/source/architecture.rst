@@ -1,6 +1,6 @@
+.. _arch-sec:
 Architecture
 ============
-.. _arch-sec:
 1 page, diagrams optional:
 
 frontend vs backend
