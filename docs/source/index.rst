@@ -1,5 +1,5 @@
 Group Coursework Management System (GCMS) Documentation
-======================================================
+========================================================
 
 **GCMS** is a web application to help students manage their group coursework projects.
 
@@ -17,26 +17,6 @@ Group Coursework Management System (GCMS) Documentation
    external-integrations/index
    troubleshooting
    contributing
-
-Getting Started <getting-started/index>
----------------------------------------
-
-.. toctree::
-   :maxdepth: 1
-   :hidden:
-
-   getting-started/prerequisites
-   getting-started/installation
-   getting-started/environment-configuration
-   getting-started/database-setup
-   getting-started/running-the-app
-
-Architecture <architecture/index>
----------------------------------
-
-.. toctree::
-   :maxdepth: 1
-   :hidden:
 
    architecture/overview
    architecture/folder-structure
