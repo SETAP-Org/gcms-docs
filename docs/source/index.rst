@@ -17,27 +17,6 @@ Group Coursework Management System (GCMS) Documentation
    external-integrations/index
    troubleshooting
    contributing
-
-Getting Started
-===============
-
-.. toctree::
-   :maxdepth: 1
-
-   prerequisites
-   installation
-   environment-configuration
-   database-setup
-   running-the-app
-
-Architecture <architecture/index>
----------------------------------
-
-.. toctree::
-   :maxdepth: 1
-   :hidden:
-
-   architecture/overview
    architecture/folder-structure
    architecture/event-bus
 
