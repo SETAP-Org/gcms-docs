@@ -18,18 +18,17 @@ Group Coursework Management System (GCMS) Documentation
    troubleshooting
    contributing
 
-Getting Started <getting-started/index>
----------------------------------------
+Getting Started
+===============
 
 .. toctree::
    :maxdepth: 1
-   :hidden:
 
-   getting-started/prerequisites
-   getting-started/installation
-   getting-started/environment-configuration
-   getting-started/database-setup
-   getting-started/running-the-app
+   prerequisites
+   installation
+   environment-configuration
+   database-setup
+   running-the-app
 
 Architecture <architecture/index>
 ---------------------------------
