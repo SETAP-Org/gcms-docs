@@ -1,23 +1,82 @@
-Welcome to Group Coursework Management System (GCMS)'s documentation!
-===================================
+Group Coursework Management System (GCMS) Documentation
+======================================================
 
 **GCMS** is a web application to help students manage their group coursework projects.
 
-Check out the :doc:`usage` section for further information, including
-how to :ref:`installation` the project. :doc:`architecture` :ref:`arch-sec`
-
 .. note::
-
    This project is under active development.
 
-Contents
---------
+.. toctree::
+   :maxdepth: 2
+   :caption: Table of Contents
+
+   getting-started/index
+   architecture/index
+   database-schema/index
+   api-reference/index
+   external-integrations/index
+   troubleshooting
+   contributing
+
+Getting Started <getting-started/index>
+---------------------------------------
 
 .. toctree::
+   :maxdepth: 1
+   :hidden:
 
-   installation
-   usage
-   architecture
-   api
-   contributing
-   changelog
+   getting-started/prerequisites
+   getting-started/installation
+   getting-started/environment-configuration
+   getting-started/database-setup
+   getting-started/running-the-app
+
+Architecture <architecture/index>
+---------------------------------
+
+.. toctree::
+   :maxdepth: 1
+   :hidden:
+
+   architecture/overview
+   architecture/folder-structure
+   architecture/event-bus
+
+Database Schema <database-schema/index>
+--------------------------------------
+
+.. toctree::
+   :maxdepth: 1
+   :hidden:
+
+   database-schema/entity-reference
+   database-schema/er-diagram
+
+API Reference <api-reference/index>
+----------------------------------
+
+.. toctree::
+   :maxdepth: 1
+   :hidden:
+
+   api-reference/auth-routes
+   api-reference/project-routes
+   api-reference/task-routes
+   api-reference/other-routes
+
+External Integrations <external-integrations/index>
+---------------------------------------------------
+
+.. toctree::
+   :maxdepth: 1
+   :hidden:
+
+   external-integrations/microsoft-graph
+   external-integrations/openai
+   external-integrations/emailjs
+
+Troubleshooting <troubleshooting>
+-------------------------------
+
+Contributing <contributing>
+--------------------------
