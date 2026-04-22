@@ -1,5 +1,5 @@
 Group Coursework Management System (GCMS) Documentation
-======================================================
+========================================================
 
 **GCMS** is a web application to help students manage their group coursework projects.
 
