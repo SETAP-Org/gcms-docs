@@ -1,5 +1,5 @@
 'Read The Docs' Documentation for Group Course Management System (GCMS)
 =======================================
 
-'Read The Docs' tutorial here:
-https://docs.readthedocs.io/en/stable/tutorial/
+
+https://gcms-docs.readthedocs.io/en/latest/index.html
