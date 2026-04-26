@@ -1,4 +1,4 @@
-rstRunning the App
+Running the App
 ===============
 
 Start the development server::

@@ -1,4 +1,4 @@
-rstGetting Started
+Getting Started
 ===============
 
 This guide will get GCMS running on your local machine.

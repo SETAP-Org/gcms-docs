@@ -1,4 +1,4 @@
-rstDatabase Setup
+Database Setup
 ==============
 
 GCMS includes an automated database setup script. Run it once after configuring your ``.env``::

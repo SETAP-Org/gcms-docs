@@ -1,4 +1,4 @@
-rstPrerequisites
+Prerequisites
 =============
 
 Before installing GCMS, make sure you have the following installed:

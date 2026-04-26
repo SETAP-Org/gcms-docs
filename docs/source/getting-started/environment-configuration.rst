@@ -1,4 +1,4 @@
-rstEnvironment Configuration
+Environment Configuration
 =========================
 
 Content coming soon.

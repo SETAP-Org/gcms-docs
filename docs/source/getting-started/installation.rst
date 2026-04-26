@@ -1,4 +1,4 @@
-rstInstallation
+Installation
 ============
 
 Clone the repository::
