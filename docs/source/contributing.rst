@@ -1,4 +1,4 @@
-rstContributing
+Contributing
 ============
 
 Thank you for your interest in contributing to GCMS! This guide covers
