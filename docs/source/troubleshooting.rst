@@ -1,4 +1,4 @@
-rstTroubleshooting
+Troubleshooting
 ===============
 
 Common issues encountered when setting up or running GCMS, and how to
