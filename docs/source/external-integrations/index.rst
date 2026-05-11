@@ -1,77 +1,63 @@
-External Integrations
-=====================
+Google Gemini
+-------------
 
-GCMS integrates with external services to extend its functionality
-beyond what the core application provides.
+GCMS uses the Google Gemini API to power the in-app AI assistant. The
+assistant helps students understand their coursework specifications,
+summarise documents, and answer questions about their project.
 
-Microsoft Graph API
--------------------
+Model
+~~~~~
 
-GCMS uses the Microsoft Graph API for two purposes: user authentication
-and calendar integration.
+The default model is ``gemini-2.5-flash``, chosen for its low cost and
+fast response times. This is suitable for typical student Q&A and
+document summarisation. The model can be swapped to ``gemini-2.5-pro``
+for higher quality at higher cost.
 
-Authentication
-~~~~~~~~~~~~~~
+File attachments
+~~~~~~~~~~~~~~~~
 
-User login is handled through Microsoft OAuth via Passport.js. When a
-user signs in with their Microsoft account, GCMS receives an access
-token that is used for subsequent Graph API calls.
+When a user asks the assistant a question, GCMS can attach files from
+the project's shared folder so the model can reason about their
+contents. Files are handled in one of two ways depending on type:
 
-The OAuth flow requires an Azure App Registration with the following
-configured:
+**Sent natively to Gemini:**
 
-- **Redirect URI** matching the URI used by the application
-- **Client secret** for confidential client authentication
-- **API permissions** for the scopes used by GCMS
+- PDF (``application/pdf``)
+- Plain text (``text/plain``)
+- Markdown (``text/markdown``)
+- CSV (``text/csv``)
+- HTML (``text/html``)
 
-Calendar Integration
-~~~~~~~~~~~~~~~~~~~~
+**Extracted to plain text on the server before sending:**
 
-When a meeting is created on a project's calendar page, GCMS uses the
-authenticated user's access token to create a corresponding event in
-their personal Microsoft calendar.
+- Word documents (``.docx``) — extracted with ``mammoth``
+- Excel spreadsheets (``.xlsx``, ``.xls``) — extracted with ``xlsx``
+- PowerPoint presentations (``.pptx``) — extracted with ``officeparser``
 
-Required scopes
-~~~~~~~~~~~~~~~
+For Office formats, GCMS extracts the readable text content server-side
+and forwards it to Gemini as ``text/plain``. This avoids the need for
+native Office support in the model and keeps request sizes small.
 
-The application requests the following scopes during the OAuth flow:
+A total budget of 15 MB is enforced across all attachments in a single
+request. Files exceeding the budget or of unsupported types are
+silently skipped, and the model is informed of any omissions so it
+can reference this in its response.
 
-- ``openid`` — required for OpenID Connect authentication
-- ``profile`` — basic profile information
-- ``email`` — user's email address
-- ``Calendars.ReadWrite`` — read and write access to the user's calendar
+System instruction
+~~~~~~~~~~~~~~~~~~
 
-These are configured in the ``MICROSOFT_SCOPES`` environment variable
-within ``.env.auth``.
+Every Gemini request includes a system instruction that defines the
+assistant's persona and behavioural guidelines. The assistant is
+configured to:
 
-Setting up your own Azure App Registration
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+- Keep responses concise
+- Admit when it does not know an answer rather than inventing one
+- Explain, summarise, and clarify rather than complete the coursework
+  on the student's behalf
 
-If you are setting up GCMS independently and need to register your own
-Azure app:
+Configuration
+~~~~~~~~~~~~~
 
-1. Go to the `Azure Portal <https://portal.azure.com/>`_ and sign in
-2. Navigate to **App Registrations** and click **New registration**
-3. Set the redirect URI to ``http://localhost:3000/auth/microsoft/callback``
-   for local development
-4. Under **Certificates & Secrets**, generate a new client secret
-5. Under **API Permissions**, add the scopes listed above
-6. Copy the Application (client) ID and the secret value into your
-   ``.env.auth`` file
-
-.. note::
-
-   For team members working on GCMS, the existing Azure App Registration
-   credentials will be provided. You do not need to create your own.
-
-Future integrations
--------------------
-
-The following integrations are planned for future development.
-
-OpenAI API
-~~~~~~~~~~
-
-OpenAI integration is on the GCMS roadmap. Planned use cases include
-intelligent task suggestions, project summaries, and assistance with
-contribution analysis. This feature is not yet implemented.
+The Gemini API key is stored in ``.env.gemini`` as ``GEMINI_API_KEY``.
+The client is lazily initialised on the first request, so importing
+``utils/gemini.js`` does not require the key to be set at startup.
