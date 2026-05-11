@@ -20,6 +20,7 @@ Column                        Type                   Notes
 ``username``                  ``varchar``            Unique, 3–20 characters, user-chosen
 ``date_created``              ``timestamptz``        Account creation timestamp
 ``last_login``                ``timestamptz``        Most recent login timestamp
+``email_notifications``       ``boolean``            Whether the user has opted into email notifications, default ``false``
 ============================  =====================  =============================================
 
 projects
@@ -164,6 +165,45 @@ Column                        Type                   Notes
 ``widget_text``               ``varchar``            Widget content, optional
 ============================  =====================  =============================================
 
+files
+-----
+
+Metadata for files uploaded to a project's shared folder. The actual file
+contents are stored in a Supabase Storage bucket; this table only tracks
+the metadata.
+
+============================  =====================  =============================================
+Column                        Type                   Notes
+============================  =====================  =============================================
+``file_id``                   ``uuid``               Primary key, auto-generated
+``project_id``                ``uuid``               FK → ``projects.project_id``
+``file_name``                 ``varchar``            Original file name as uploaded
+``storage_path``              ``text``               Path within the Supabase Storage bucket
+``size``                      ``bigint``             File size in bytes
+``date_uploaded``             ``timestamp``          Upload timestamp
+============================  =====================  =============================================
+
+ai_chat_messages
+----------------
+
+Stores the per-project chat history with the GCMS AI assistant
+(powered by Google Gemini). Each row represents one message in the
+conversation, from either the user or the assistant.
+
+============================  =====================  =============================================
+Column                        Type                   Notes
+============================  =====================  =============================================
+``ai_message_id``             ``uuid``               Primary key, auto-generated
+``project_id``                ``uuid``               FK → ``projects.project_id``, ``ON DELETE CASCADE``
+``user_id``                   ``uuid``               FK → ``users.user_id``, ``ON DELETE SET NULL``
+``role``                      ``ai_chat_role``       Enum (see Custom Types below)
+``content``                   ``text``               Message body
+``ai_date_sent``              ``timestamptz``        Send timestamp, defaults to ``NOW()``
+============================  =====================  =============================================
+
+An index on ``(project_id, ai_date_sent)`` keeps history retrieval fast
+even as conversations grow.
+
 Custom Types
 ------------
 
@@ -201,3 +241,10 @@ fixed set of options.
    - ``Member Join`` — a member joined the project
    - ``Leader`` — leadership change
    - ``Task`` — task assigned, updated, or completed
+
+``ai_chat_role``
+   Used by ``ai_chat_messages.role``. Distinguishes who sent each
+   message in an AI assistant conversation.
+
+   - ``user`` — the human's message
+   - ``assistant`` — the AI's response

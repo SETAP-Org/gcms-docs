@@ -31,6 +31,11 @@ a foreign key relationship.
        users ||--o{ notifications : "receives"
        projects ||--o{ notifications : "triggers"
 
+       projects ||--o{ files : "stores"
+
+       projects ||--o{ ai_chat_messages : "has chat history"
+       users ||--o{ ai_chat_messages : "authors"
+
        users {
            uuid user_id PK
            varchar user_first_name
@@ -40,6 +45,7 @@ a foreign key relationship.
            varchar username UK
            timestamptz date_created
            timestamptz last_login
+           boolean email_notifications
        }
 
        projects {
@@ -113,6 +119,24 @@ a foreign key relationship.
            numeric widget_x
            numeric widget_y
            varchar widget_text
+       }
+
+       files {
+           uuid file_id PK
+           uuid project_id FK
+           varchar file_name
+           text storage_path
+           bigint size
+           timestamp date_uploaded
+       }
+
+       ai_chat_messages {
+           uuid ai_message_id PK
+           uuid project_id FK
+           uuid user_id FK
+           ai_chat_role role
+           text content
+           timestamptz ai_date_sent
        }
 
 Reading the diagram
