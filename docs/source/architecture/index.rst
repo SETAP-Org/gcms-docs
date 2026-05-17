@@ -13,6 +13,7 @@ High-level overview
 
    flowchart TB
        Browser["Browser<br/>(EJS views + JS)"]
+       Listen["listen.js<br/>(starts HTTP server)"]
        Server["server.js<br/>(HTTP + Socket.io)"]
        App["app.js<br/>(Express app)"]
        Routes["routes/<br/>(URL → controller)"]
@@ -22,7 +23,8 @@ High-level overview
        DB[("Supabase<br/>PostgreSQL + Storage")]
        External["External services<br/>Microsoft Graph<br/>Google Gemini<br/>Mailtrap"]
 
-       Browser <--> Server
+       Browser <--> Listen
+       Listen --> Server
        Server --> App
        App --> Routes
        Routes --> Controllers
@@ -61,34 +63,26 @@ Request flow
 A typical HTTP request flows through the application like this:
 
 1. **Browser** sends a request (e.g. ``POST /api/tasks``)
-2. **server.js** receives the HTTP request and forwards it to the Express app
-3. **app.js** routes it to the correct ``app.use`` mount
-4. **Route file** matches the URL pattern and calls the controller
-5. **Controller** validates the request, checks authentication,
+2. **listen.js** is what's actively listening; Node hands the request
+   to the HTTP server it started
+3. **server.js** forwards the request to the Express app (and routes
+   socket frames to the Socket.io handlers)
+4. **app.js** routes it to the correct ``app.use`` mount
+5. **Route file** matches the URL pattern and calls the controller
+6. **Controller** validates the request, checks authentication,
    and calls one or more models
-6. **Model** executes a parameterised SQL query against Supabase
-7. **Controller** formats the result and sends an HTTP response
-8. **Socket.io** (where relevant) broadcasts the change to other
+7. **Model** executes a parameterised SQL query against Supabase
+8. **Controller** formats the result and sends an HTTP response
+9. **Socket.io** (where relevant) broadcasts the change to other
    connected clients in the same project
 
 Entry points
 ------------
 
-GCMS uses a two-file entry point that separates the Express app from
-the HTTP server. This separation makes integration testing easier —
-tests can import ``app.js`` directly without binding a port.
-
-server.js
-~~~~~~~~~
-
-``server.js`` is the runtime entry point invoked by ``npm run dev``
-and ``npm run prod``. It:
-
-- Imports the configured Express app from ``app.js``
-- Creates an HTTP server wrapping the app
-- Attaches Socket.io to the HTTP server
-- Initialises socket event handlers via ``utils/socket.js``
-- Listens on port 3000
+GCMS uses a three-file entry point that separates concerns cleanly
+and makes each layer independently testable. Tests can import the
+Express app, the HTTP+Socket.io server, or trigger live listening
+behaviour as needed without touching the others.
 
 app.js
 ~~~~~~
@@ -107,6 +101,32 @@ When ``NODE_ENV=test``, ``app.js`` injects a bypass middleware that
 populates ``req.user`` with a stub user, so integration tests can
 exercise authenticated routes without going through the full OAuth
 flow.
+
+server.js
+~~~~~~~~~
+
+``server.js`` wraps the Express app in a Node HTTP server and attaches
+Socket.io to it. It:
+
+- Imports the configured Express app from ``app.js``
+- Creates an HTTP server wrapping the app
+- Attaches Socket.io to the HTTP server
+- Initialises socket event handlers via ``utils/socket.js``
+- Exports the configured server (but does **not** call ``listen``)
+
+This separation allows integration tests for socket features to
+import the server directly without binding to a port.
+
+listen.js
+~~~~~~~~~
+
+``listen.js`` is the runtime entry point invoked by ``npm run dev``
+and ``npm run prod``. Its single responsibility is to import the
+configured server and begin listening on port 3000.
+
+This means production code, integration tests, and socket tests can
+each pick the entry point that matches their needs without pulling
+in irrelevant behaviour.
 
 Routes
 ------
