@@ -18,71 +18,159 @@
        end
 
        subgraph Partials["Shared Partials"]
-           PNav["userNav, projectNav, landingNav"]
-           PNot["notifications"]
+           PUNav["userNav"]
+           PPNav["projectNav"]
+           PLNav["landingNav"]
            PAI["aiAssistant"]
            PFoot["footer"]
            PCook["cookieBanner"]
            PLoad["loading"]
-           PFiles["projectFiles"]
        end
 
-       subgraph Scripts["Client Scripts"]
-           SUtil["utils.js"]
+       subgraph LocalScripts["Local Client Scripts"]
            SLD["LD-mode.js"]
-           SCook["cookieBanner.js"]
-           SNav["userNav, projectNav"]
            SWel["welcome.js"]
            SUDash["userDash.js"]
            SProf["profile.js"]
            SProj["projects.js"]
            SKonva["konva-dash.js"]
+           SLoadCal["loadCalandar.js"]
            SPInfo["projectInfo.js"]
            STask["projectTasks.js"]
-           SCal["projectCalendar.js, loadCalandar.js"]
+           SCal["projectCalendar.js"]
            SChat["projectChat.js"]
            SCont["projectContributions.js"]
            SFiles["projectFiles.js"]
-           SAI["aiAssistant.js"]
            SErr["error.js"]
+           SAI["aiAssistant.js"]
+           SCook["cookieBanner.js"]
+           SUNav["userNav.js"]
+           SPNav["projectNav.js"]
+           SUtil["utils.js"]
        end
 
-       subgraph Styles["Stylesheets"]
-           CSSRoot["root-light.css, root-dark.css"]
-           CSSBase["styles.css, header_style.css, footer.css"]
-           CSSPage["Per-page CSS files"]
+       subgraph External["External JS"]
+           SIO["socket.io.js"]
+           ChartJS["chart.js"]
+           Konva["konva.js"]
+           FullCal["fullcalendar.js"]
        end
 
-       VLand --> SWel
+       VLand --> PLNav
+       VLand --> PCook
+       VLand --> PFoot
+       VLand --> PLoad
+       VLand --> SLD
+
+       VWel --> SWel
+
+       VUDash --> PUNav
+       VUDash --> PFoot
+       VUDash --> PLoad
+       VUDash --> SLD
        VUDash --> SUDash
-       VProf --> SProf
+
+       VProj --> PUNav
+       VProj --> PFoot
+       VProj --> PLoad
+       VProj --> SLD
        VProj --> SProj
+
+       VProf --> PUNav
+       VProf --> PFoot
+       VProf --> PLoad
+       VProf --> SLD
+       VProf --> SProf
+
+       VPDash --> PUNav
+       VPDash --> PPNav
+       VPDash --> PAI
+       VPDash --> PFoot
+       VPDash --> PLoad
+       VPDash --> SLD
        VPDash --> SKonva
+       VPDash --> SLoadCal
+       VPDash --> Konva
+       VPDash --> FullCal
+
+       VPInfo --> PUNav
+       VPInfo --> PPNav
+       VPInfo --> PAI
+       VPInfo --> PFoot
+       VPInfo --> PLoad
+       VPInfo --> SLD
        VPInfo --> SPInfo
+       VPInfo --> SIO
+
+       VPTask --> PUNav
+       VPTask --> PPNav
+       VPTask --> PAI
+       VPTask --> PFoot
+       VPTask --> PLoad
+       VPTask --> SLD
        VPTask --> STask
+       VPTask --> SIO
+
+       VPCal --> PUNav
+       VPCal --> PPNav
+       VPCal --> PAI
+       VPCal --> PFoot
+       VPCal --> PLoad
+       VPCal --> SLD
        VPCal --> SCal
+       VPCal --> SIO
+
+       VPChat --> PUNav
+       VPChat --> PPNav
+       VPChat --> PAI
+       VPChat --> PFoot
+       VPChat --> PLoad
+       VPChat --> SLD
        VPChat --> SChat
+       VPChat --> SIO
+
+       VPCont --> PUNav
+       VPCont --> PPNav
+       VPCont --> PAI
+       VPCont --> PFoot
+       VPCont --> PLoad
+       VPCont --> SLD
        VPCont --> SCont
+       VPCont --> ChartJS
+
+       VPFiles --> PUNav
+       VPFiles --> PPNav
+       VPFiles --> PAI
+       VPFiles --> PLoad
+       VPFiles --> SLD
        VPFiles --> SFiles
+
+       VErr --> PLoad
+       VErr --> SLD
        VErr --> SErr
 
-       VLand --> CSSBase
-       VPDash --> CSSPage
        PAI --> SAI
+       PCook --> SCook
+       PUNav --> SUNav
+       PPNav --> SPNav
 
        SChat --> SUtil
        STask --> SUtil
        SUDash --> SUtil
-
-       CSSBase --> CSSRoot
-       CSSPage --> CSSRoot
+       SProj --> SUtil
+       SPInfo --> SUtil
+       SCal --> SUtil
+       SCont --> SUtil
+       SFiles --> SUtil
+       SAI --> SUtil
+       SKonva --> SUtil
 
        classDef view fill:#e8f0fe,stroke:#1a73e8,color:#000
        classDef partial fill:#fef7e0,stroke:#f9a825,color:#000
        classDef script fill:#e8f5e9,stroke:#2e7d32,color:#000
-       classDef cssfile fill:#fce4ec,stroke:#c2185b,color:#000
+       classDef ext fill:#ffebee,stroke:#c62828,color:#000
 
        class VLand,VWel,VUDash,VProf,VProj,VPDash,VPInfo,VPTask,VPCal,VPChat,VPCont,VPFiles,VErr view
-       class PNav,PNot,PAI,PFoot,PCook,PLoad,PFiles partial
-       class SUtil,SLD,SCook,SNav,SWel,SUDash,SProf,SProj,SKonva,SPInfo,STask,SCal,SChat,SCont,SFiles,SAI,SErr script
-       class CSSRoot,CSSBase,CSSPage cssfile
+       class PUNav,PPNav,PLNav,PAI,PFoot,PCook,PLoad partial
+       class SLD,SWel,SUDash,SProf,SProj,SKonva,SLoadCal,SPInfo,STask,SCal,SChat,SCont,SFiles,SErr,SAI,SCook,SUNav,SPNav,SUtil script
+       class SIO,ChartJS,Konva,FullCal ext
