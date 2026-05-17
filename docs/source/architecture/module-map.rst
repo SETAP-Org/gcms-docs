@@ -23,7 +23,7 @@ utilities.
 .. mermaid::
 
    flowchart LR
-       subgraph Pages["EJS Pages (views/)"]
+       subgraph Pages["EJS Pages"]
            VLand["landing.ejs"]
            VWel["welcome.ejs"]
            VUDash["userDash.ejs"]
@@ -39,8 +39,8 @@ utilities.
            VErr["error.ejs"]
        end
 
-       subgraph Partials["Shared Partials (views/partials/)"]
-           PNav["userNav / projectNav / landingNav"]
+       subgraph Partials["Shared Partials"]
+           PNav["userNav, projectNav, landingNav"]
            PNot["notifications"]
            PAI["aiAssistant"]
            PFoot["footer"]
@@ -49,11 +49,11 @@ utilities.
            PFiles["projectFiles"]
        end
 
-       subgraph Scripts["Client Scripts (public/scripts/)"]
-           SUtil["utils.js (shared helpers)"]
-           SLD["LD-mode.js (light/dark)"]
+       subgraph Scripts["Client Scripts"]
+           SUtil["utils.js"]
+           SLD["LD-mode.js"]
            SCook["cookieBanner.js"]
-           SNav["userNav / projectNav"]
+           SNav["userNav, projectNav"]
            SWel["welcome.js"]
            SUDash["userDash.js"]
            SProf["profile.js"]
@@ -61,7 +61,7 @@ utilities.
            SKonva["konva-dash.js"]
            SPInfo["projectInfo.js"]
            STask["projectTasks.js"]
-           SCal["projectCalendar.js + loadCalandar.js"]
+           SCal["projectCalendar.js, loadCalandar.js"]
            SChat["projectChat.js"]
            SCont["projectContributions.js"]
            SFiles["projectFiles.js"]
@@ -69,10 +69,10 @@ utilities.
            SErr["error.js"]
        end
 
-       subgraph Styles["Stylesheets (public/css/)"]
-           CSSRoot["root-light.css + root-dark.css (theme tokens)"]
-           CSSBase["styles.css + header_style.css + footer.css (global)"]
-           CSSPage["Per-page CSS files (project_chat.css, project_tasks.css, ...)"]
+       subgraph Styles["Stylesheets"]
+           CSSRoot["root-light.css, root-dark.css"]
+           CSSBase["styles.css, header_style.css, footer.css"]
+           CSSPage["Per-page CSS files"]
        end
 
        Pages -.embeds.-> Partials
