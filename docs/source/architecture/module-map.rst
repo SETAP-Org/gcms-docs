@@ -1,193 +1,307 @@
 Module Map
 ==========
 
-The diagram below shows every significant module in the GCMS codebase
-and how they connect. It complements the high-level overview on the
-:doc:`index` page by mapping each file you'll find in the repository
-to its position in the layered architecture.
+This page contains three diagrams that together provide a complete
+view of the GCMS codebase. They are intentionally split because
+showing everything in a single diagram becomes unreadable.
 
-Colours indicate the architectural layer each module belongs to:
+- **Front-end architecture** — how EJS views, client-side JS, and
+  stylesheets are organised
+- **Backend module map** — every route, controller, model, and
+  utility, with key function names on the connections
+- **External integration flows** — how external services connect
+  to the codebase
 
-- **Blue** — client-side (browser)
-- **Orange** — entry points (boot files at repo root)
-- **Pink** — real-time layer (Socket.io)
-- **Purple** — routes
-- **Green** — controllers
-- **Yellow** — models
-- **Teal** — utilities
-- **Lavender** — data stores
-- **Red** — external services
+Front-end architecture
+----------------------
+
+GCMS renders pages server-side with EJS, then progressively enhances
+each page with a dedicated client-side script. Every page has its
+own EJS view, JS file, and CSS file, plus shared partials and
+utilities.
+
+.. mermaid::
+
+   flowchart LR
+       subgraph Pages["EJS Pages (views/)"]
+           VLand["landing.ejs"]
+           VWel["welcome.ejs"]
+           VUDash["userDash.ejs"]
+           VProf["profile.ejs"]
+           VProj["projects.ejs"]
+           VPDash["projectDash.ejs"]
+           VPInfo["projectInfo.ejs"]
+           VPTask["projectTasks.ejs"]
+           VPCal["projectCalendar.ejs"]
+           VPChat["projectChat.ejs"]
+           VPCont["projectContributions.ejs"]
+           VPFiles["projectFiles.ejs"]
+           VErr["error.ejs"]
+       end
+
+       subgraph Partials["Shared Partials (views/partials/)"]
+           PNav["userNav / projectNav / landingNav"]
+           PNot["notifications"]
+           PAI["aiAssistant"]
+           PFoot["footer"]
+           PCook["cookieBanner"]
+           PLoad["loading"]
+           PFiles["projectFiles"]
+       end
+
+       subgraph Scripts["Client Scripts (public/scripts/)"]
+           SUtil["utils.js<br/>(shared helpers)"]
+           SLD["L&D-mode.js<br/>(light/dark)"]
+           SCook["cookieBanner.js"]
+           SNav["userNav / projectNav"]
+           SWel["welcome.js"]
+           SUDash["userDash.js"]
+           SProf["profile.js"]
+           SProj["projects.js"]
+           SKonva["konva-dash.js"]
+           SPInfo["projectInfo.js"]
+           STask["projectTasks.js"]
+           SCal["projectCalendar.js<br/>loadCalandar.js"]
+           SChat["projectChat.js"]
+           SCont["projectContributions.js"]
+           SFiles["projectFiles.js"]
+           SAI["aiAssistant.js"]
+           SErr["error.js"]
+       end
+
+       subgraph Styles["Stylesheets (public/css/)"]
+           CSSRoot["root-light.css / root-dark.css<br/>(theme tokens)"]
+           CSSBase["styles.css / header_style.css /<br/>footer.css (global)"]
+           CSSPage["Per-page CSS files<br/>(project_chat.css, project_tasks.css, ...)"]
+       end
+
+       Pages -.embeds.-> Partials
+       Pages -->|loads| Scripts
+       Pages -->|links| Styles
+
+       VPDash --> SKonva
+       VPCal --> SCal
+       VPChat --> SChat
+       VPFiles --> SFiles
+       PAI --> SAI
+
+       Scripts -.uses.-> SUtil
+
+       CSSBase -.uses tokens.-> CSSRoot
+       CSSPage -.uses tokens.-> CSSRoot
+
+       classDef view fill:#e8f0fe,stroke:#1a73e8,color:#000
+       classDef partial fill:#fef7e0,stroke:#f9a825,color:#000
+       classDef script fill:#e8f5e9,stroke:#2e7d32,color:#000
+       classDef style fill:#fce4ec,stroke:#c2185b,color:#000
+
+       class VLand,VWel,VUDash,VProf,VProj,VPDash,VPInfo,VPTask,VPCal,VPChat,VPCont,VPFiles,VErr view
+       class PNav,PNot,PAI,PFoot,PCook,PLoad,PFiles partial
+       class SUtil,SLD,SCook,SNav,SWel,SUDash,SProf,SProj,SKonva,SPInfo,STask,SCal,SChat,SCont,SFiles,SAI,SErr script
+       class CSSRoot,CSSBase,CSSPage style
+
+Backend module map
+------------------
+
+The backend follows a strict layered pattern. Each route file maps
+to a controller, which calls one or more models. Arrows on the
+diagram are labelled with the most representative function names
+on each connection.
 
 .. mermaid::
 
    flowchart TB
-       subgraph Client["Client (Browser)"]
-           UI["EJS Views<br/>(views/)"]
-           CJS["Client JS<br/>(public/scripts/)"]
-           CSS["Stylesheets<br/>(public/styles/)"]
-           SocketClient["Socket.io Client"]
-       end
-
-       subgraph Boot["Entry Points"]
-           Listen["listen.js<br/>(starts HTTP server)"]
-           ServerJS["server.js<br/>(HTTP + Socket.io)"]
-           AppJS["app.js<br/>(Express app)"]
-       end
-
-       subgraph RT["Real-time Layer"]
-           SocketServer["Socket.io Server<br/>(utils/socket.js)"]
+       subgraph Entry["Entry Points"]
+           Listen["listen.js"]
+           ServerJS["server.js"]
+           AppJS["app.js"]
+           Socket["utils/socket.js"]
        end
 
        subgraph Routes["Routes (routes/)"]
-           PR["pageRoutes"]
-           AR["authRoutes"]
-           UR["userRoutes"]
-           PJR["projectRoutes"]
-           TR["taskRoutes"]
-           CR["calendarRoutes"]
-           NR["notificationsRoutes"]
-           CTR["contributionsRoutes"]
-           NoR["noteRoutes"]
-           FR["fileRoutes"]
-           AIR["aiRoutes"]
+           Rpage["pageRoutes"]
+           Rauth["authRoutes"]
+           Ruser["userRoutes"]
+           Rproj["projectRoutes"]
+           Rtask["taskRoutes"]
+           Rcal["calendarRoutes"]
+           Rnotif["notificationsRoutes"]
+           Rcontrib["contributionsRoutes"]
+           Rnote["noteRoutes"]
+           Rfile["fileRoutes"]
+           Rai["aiRoutes"]
        end
 
        subgraph Controllers["Controllers (controllers/)"]
-           SC["serveControllers"]
-           AC["authControllers"]
-           UC["userControllers"]
-           PC["projectControllers"]
-           UPC["userProjectControllers"]
-           TC["taskControllers"]
-           CC["calendarControllers"]
-           NC["notificationControllers"]
-           CTC["contributionControllers"]
-           KC["konvaControllers"]
-           FC["fileControllers"]
-           AICC["aiChatControllers"]
+           Cserve["serveControllers<br/>serveLanding, serveProjectDash,<br/>serveProjectTasks, ..."]
+           Cauth["authControllers<br/>checkIfLoggedIn, signOut,<br/>authenticatePassport"]
+           Cuser["userControllers<br/>addUser, updateUsername,<br/>getCurrentUserPhoto"]
+           Cproj["projectControllers<br/>addProject, getUserProjects,<br/>updateTeamLeader, checkMembership"]
+           Cuproj["userProjectControllers<br/>addUserToProject,<br/>removeUserFromProject"]
+           Ctask["taskControllers<br/>addTask, getProjectTasks,<br/>updateTaskStatus, deleteTask"]
+           Ccal["calendarControllers<br/>getEvent, addEvent, removeEvent"]
+           Cnotif["notificationControllers<br/>fetchNotificationsByUserId,<br/>removeNotification"]
+           Ccontrib["contributionControllers<br/>getProjectContributions"]
+           Ckonva["konvaControllers<br/>addNote, updateNote,<br/>removeNote, getNotes"]
+           Cfile["fileControllers<br/>initFileUpload, addFileMetadata,<br/>getDownloadUrl, deleteFile"]
+           Cai["aiChatControllers<br/>postAiChatMessage,<br/>getAiChatMessages, clearAiChatHistory"]
        end
 
        subgraph Models["Models (models/)"]
-           UM["userModels"]
-           PM["projectModels"]
-           UPM["userProjectModels"]
-           TM["taskModels"]
-           ChM["chatModels"]
-           CalM["calendarModels"]
-           MeetM["meetingModels"]
-           NoM["notificationModels"]
-           CtM["contributionModels"]
-           KM["konvaModels"]
-           FM["fileModels"]
-           AIM["aiChatModels"]
+           Muser["userModels"]
+           Mproj["projectModels"]
+           Muproj["userProjectModels"]
+           Mtask["taskModels"]
+           Mchat["chatModels"]
+           Mcal["calendarModels"]
+           Mmeet["meetingModels"]
+           Mnotif["notificationModels"]
+           Mcontrib["contributionModels"]
+           Mkonva["konvaModels"]
+           Mfile["fileModels"]
+           Mai["aiChatModels"]
        end
-
-       subgraph Utils["Utilities (utils/)"]
-           AuthU["auth.js<br/>(Passport)"]
-           SessU["session.js"]
-           SupU["supabase.js<br/>(pg pool + client)"]
-           GemU["gemini.js"]
-           FileU["fileFetcher.js"]
-           EmailU["emailSender.js"]
-           EConfU["emailConfig.js"]
-       end
-
-       subgraph DB["Data Layer"]
-           PGPool[("PostgreSQL<br/>via pg pool")]
-           Bucket[("Supabase<br/>Storage Bucket")]
-       end
-
-       subgraph External["External Services"]
-           MS["Microsoft<br/>Graph API"]
-           Gem["Google Gemini"]
-           Mail["Mailtrap SMTP"]
-       end
-
-       UI -->|HTTP| Listen
-       CJS -->|fetch| Listen
-       SocketClient <-->|WebSocket| Listen
 
        Listen --> ServerJS
        ServerJS --> AppJS
-       ServerJS --> SocketServer
+       ServerJS --> Socket
 
-       AppJS --> Routes
-       Routes --> Controllers
+       AppJS --> Rpage
+       AppJS --> Rauth
+       AppJS --> Ruser
+       AppJS --> Rproj
+       AppJS --> Rtask
+       AppJS --> Rcal
+       AppJS --> Rnotif
+       AppJS --> Rcontrib
+       AppJS --> Rnote
+       AppJS --> Rfile
+       AppJS --> Rai
 
-       SocketServer --> Controllers
+       Rpage --> Cserve
+       Rauth --> Cauth
+       Ruser --> Cuser
+       Rproj --> Cproj
+       Rproj --> Cuproj
+       Rtask --> Ctask
+       Rcal --> Ccal
+       Rnotif --> Cnotif
+       Rcontrib --> Ccontrib
+       Rnote --> Ckonva
+       Rfile --> Cfile
+       Rai --> Cai
 
-       Controllers --> Models
-       Controllers --> Utils
+       Socket -->|chat:send| Cnotif
+       Socket -->|task:update| Ctask
+       Socket -->|widget:update| Ckonva
 
-       Models --> SupU
-       SupU --> PGPool
+       Cserve --> Mproj
+       Cserve --> Muser
+       Cauth --> Muser
+       Cuser --> Muser
+       Cproj --> Mproj
+       Cproj --> Muproj
+       Cuproj --> Muproj
+       Ctask --> Mtask
+       Ccal --> Mcal
+       Ccal --> Mmeet
+       Cnotif --> Mnotif
+       Cnotif --> Mchat
+       Ccontrib --> Mcontrib
+       Ckonva --> Mkonva
+       Cfile --> Mfile
+       Cai --> Mai
 
-       FC --> SupU
-       SupU --> Bucket
+       classDef entry fill:#fff3e0,stroke:#f57c00,color:#000
+       classDef route fill:#f3e5f5,stroke:#7b1fa2,color:#000
+       classDef ctrl fill:#e8f5e9,stroke:#2e7d32,color:#000
+       classDef model fill:#fff9c4,stroke:#f9a825,color:#000
 
-       AuthU --> MS
-       CC --> MS
-       FileU --> MS
+       class Listen,ServerJS,AppJS,Socket entry
+       class Rpage,Rauth,Ruser,Rproj,Rtask,Rcal,Rnotif,Rcontrib,Rnote,Rfile,Rai route
+       class Cserve,Cauth,Cuser,Cproj,Cuproj,Ctask,Ccal,Cnotif,Ccontrib,Ckonva,Cfile,Cai ctrl
+       class Muser,Mproj,Muproj,Mtask,Mchat,Mcal,Mmeet,Mnotif,Mcontrib,Mkonva,Mfile,Mai model
 
-       AICC --> GemU
-       GemU --> Gem
-       AICC --> FileU
-       FileU --> SupU
+External integration flows
+--------------------------
 
-       EmailU --> EConfU
-       EConfU --> Mail
-       NC --> EmailU
+GCMS connects to four external services. Each integration is
+accessed through a dedicated utility module, with specific
+controllers calling them.
 
-       AppJS -.uses.-> AuthU
-       AppJS -.uses.-> SessU
+.. mermaid::
 
-       classDef clientNode fill:#e8f0fe,stroke:#1a73e8,color:#000
-       classDef bootNode fill:#fff3e0,stroke:#f57c00,color:#000
-       classDef rtNode fill:#fce4ec,stroke:#c2185b,color:#000
-       classDef routeNode fill:#f3e5f5,stroke:#7b1fa2,color:#000
-       classDef ctrlNode fill:#e8f5e9,stroke:#2e7d32,color:#000
-       classDef modelNode fill:#fff9c4,stroke:#f9a825,color:#000
-       classDef utilNode fill:#e0f2f1,stroke:#00796b,color:#000
-       classDef dbNode fill:#ede7f6,stroke:#512da8,color:#000
-       classDef extNode fill:#ffebee,stroke:#c62828,color:#000
+   flowchart LR
+       subgraph Controllers["Controllers"]
+           Cauth["authControllers"]
+           Ccal["calendarControllers"]
+           Cuser["userControllers"]
+           Cai["aiChatControllers"]
+           Cfile["fileControllers"]
+           Cnotif["notificationControllers"]
+           Cother["(other controllers)"]
+       end
 
-       class UI,CJS,CSS,SocketClient clientNode
-       class Listen,ServerJS,AppJS bootNode
-       class SocketServer rtNode
-       class PR,AR,UR,PJR,TR,CR,NR,CTR,NoR,FR,AIR routeNode
-       class SC,AC,UC,PC,UPC,TC,CC,NC,CTC,KC,FC,AICC ctrlNode
-       class UM,PM,UPM,TM,ChM,CalM,MeetM,NoM,CtM,KM,FM,AIM modelNode
-       class AuthU,SessU,SupU,GemU,FileU,EmailU,EConfU utilNode
-       class PGPool,Bucket dbNode
-       class MS,Gem,Mail extNode
+       subgraph Utils["Utilities (utils/)"]
+           Uauth["auth.js<br/>(Passport strategy)"]
+           Usup["supabase.js<br/>(pg pool + storage client)"]
+           Ugem["gemini.js<br/>(AI client)"]
+           Ufile["fileFetcher.js<br/>(download + extract text)"]
+           Uemail["emailSender.js<br/>(Nodemailer)"]
+           Uconf["emailConfig.js<br/>(SMTP config)"]
+       end
 
-How to read this diagram
-------------------------
+       subgraph DB["Data Stores"]
+           PG[("PostgreSQL<br/>(via pg pool)")]
+           Bucket[("Supabase Storage<br/>Bucket")]
+       end
 
-- **Solid arrows** indicate a direct function call or HTTP/socket
-  transport
-- **Dashed arrows** indicate "uses" relationships where one module
-  configures another (e.g. ``app.js`` uses ``auth.js`` to set up
-  Passport, but doesn't call it on every request)
-- **Cylinders** represent persistent data stores
-- The diagram shows the layered structure of the codebase, not the
-  request flow. For request flow, see the sequence on the
-  :doc:`index` page
+       subgraph External["External Services"]
+           MS["Microsoft Graph API"]
+           Gem["Google Gemini API"]
+           Mail["Mailtrap SMTP"]
+       end
 
-Notable patterns
-----------------
+       Cauth -->|authenticatePassport| Uauth
+       Uauth -->|OAuth + /me| MS
 
-A few things to notice in the diagram:
+       Ccal -->|getEvent / addEvent /<br/>removeEvent| MS
+       Cuser -->|getCurrentUserPhoto| MS
 
-- **Two paths into controllers** — Express routes for HTTP requests,
-  and the Socket.io server for real-time events. Both end up calling
-  the same controller layer.
-- **Microsoft Graph appears in three places** — authentication
-  (``auth.js``), calendar sync (``calendarControllers``), and file
-  fetching for AI context (``fileFetcher.js``).
-- **Two data stores** — the PostgreSQL pool for relational data and
-  the Supabase Storage bucket for file uploads. Both are reached
-  through ``utils/supabase.js``.
-- **Notification fan-out** — when a notification is created, the
-  controller writes to the database via the model AND emits an email
-  via the email utility. Both are essential to the user-facing flow.
+       Cother -.via models.-> Usup
+       Usup -->|SQL queries| PG
+
+       Cfile -->|initFileUpload<br/>getDownloadUrl<br/>deleteFile| Usup
+       Usup -->|signed URLs<br/>storage ops| Bucket
+
+       Cai -->|postAiChatMessage| Ugem
+       Cai -->|fetch attached files| Ufile
+       Ufile --> Usup
+       Ugem -->|generateContent| Gem
+
+       Cnotif -->|send notification| Uemail
+       Uemail --> Uconf
+       Uconf -->|SMTP| Mail
+
+       classDef ctrl fill:#e8f5e9,stroke:#2e7d32,color:#000
+       classDef util fill:#e0f2f1,stroke:#00796b,color:#000
+       classDef db fill:#ede7f6,stroke:#512da8,color:#000
+       classDef ext fill:#ffebee,stroke:#c62828,color:#000
+
+       class Cauth,Ccal,Cuser,Cai,Cfile,Cnotif,Cother ctrl
+       class Uauth,Usup,Ugem,Ufile,Uemail,Uconf util
+       class PG,Bucket db
+       class MS,Gem,Mail ext
+
+How to read these diagrams
+--------------------------
+
+- **Function names on connection labels** indicate which exported
+  functions in the source module call which functions in the target
+  module — not an exhaustive list, but the most representative ones
+- **Solid arrows** are direct function calls or HTTP/socket transport
+- **Dashed arrows** are "uses" or "embeds" relationships rather than
+  direct invocation
+- **Cylinders** are persistent data stores
+- The grouping into subgraphs reflects the actual folder structure
+  of the repository
