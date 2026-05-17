@@ -13,7 +13,8 @@ High-level overview
 
    flowchart TB
        Browser["Browser<br/>(EJS views + JS)"]
-       Server["server.js<br/>(Express + Socket.io)"]
+       Server["server.js<br/>(HTTP + Socket.io)"]
+       App["app.js<br/>(Express app)"]
        Routes["routes/<br/>(URL → controller)"]
        Controllers["controllers/<br/>(request handling)"]
        Models["models/<br/>(SQL queries)"]
@@ -22,7 +23,8 @@ High-level overview
        External["External services<br/>Microsoft Graph<br/>Google Gemini<br/>Mailtrap"]
 
        Browser <--> Server
-       Server --> Routes
+       Server --> App
+       App --> Routes
        Routes --> Controllers
        Controllers --> Models
        Controllers --> Utils
@@ -46,8 +48,7 @@ Folder                        Purpose
 ``public/``                   Static assets (CSS, client-side JS, images)
 ``db/``                       Schema definition and seed scripts
 ``node_scripts/``             Standalone Node scripts (e.g. ``install_db.js``)
-``Tests/``                    Jest unit tests, one file per user requirement
-``Automated_Testing/``        Standalone automated test scripts (e.g. notification triggers)
+``new_tests/``                Jest unit and integration tests, one pair of files per user requirement
 ============================  ====================================================
 
 The layered structure means most features touch one file per layer.
@@ -60,30 +61,52 @@ Request flow
 A typical HTTP request flows through the application like this:
 
 1. **Browser** sends a request (e.g. ``POST /api/tasks``)
-2. **server.js** routes it to the correct ``app.use`` mount
-3. **Route file** matches the URL pattern and calls the controller
-4. **Controller** validates the request, checks authentication,
+2. **server.js** receives the HTTP request and forwards it to the Express app
+3. **app.js** routes it to the correct ``app.use`` mount
+4. **Route file** matches the URL pattern and calls the controller
+5. **Controller** validates the request, checks authentication,
    and calls one or more models
-5. **Model** executes a parameterised SQL query against Supabase
-6. **Controller** formats the result and sends an HTTP response
-7. **Socket.io** (where relevant) broadcasts the change to other
+6. **Model** executes a parameterised SQL query against Supabase
+7. **Controller** formats the result and sends an HTTP response
+8. **Socket.io** (where relevant) broadcasts the change to other
    connected clients in the same project
 
-server.js
----------
+Entry points
+------------
 
-``server.js`` is the application entry point. It:
+GCMS uses a two-file entry point that separates the Express app from
+the HTTP server. This separation makes integration testing easier —
+tests can import ``app.js`` directly without binding a port.
+
+server.js
+~~~~~~~~~
+
+``server.js`` is the runtime entry point invoked by ``npm run dev``
+and ``npm run prod``. It:
+
+- Imports the configured Express app from ``app.js``
+- Creates an HTTP server wrapping the app
+- Attaches Socket.io to the HTTP server
+- Initialises socket event handlers via ``utils/socket.js``
+- Listens on port 3000
+
+app.js
+~~~~~~
+
+``app.js`` is the testable Express application. It:
 
 - Loads environment variables from ``.env.auth``
 - Configures Express middleware (JSON parsing, cookies, EJS templating,
   static assets)
 - Sets up sessions and authentication via the ``utils/`` helpers
-- Initialises the Socket.io server
 - Mounts each route file under the appropriate path (``/`` for page
   routes, ``/api`` for everything else)
-- Starts the HTTP server on port 3000
+- Exports the configured app
 
-All other concerns are delegated to the appropriate layer.
+When ``NODE_ENV=test``, ``app.js`` injects a bypass middleware that
+populates ``req.user`` with a stub user, so integration tests can
+exercise authenticated routes without going through the full OAuth
+flow.
 
 Routes
 ------
@@ -223,12 +246,20 @@ GCMS integrates with four external services. See
 Testing
 -------
 
-The ``Tests/`` folder contains Jest test suites organised by user
-requirement (one file per UR, e.g. ``UR-1.test.js``). The
-``Automated_Testing/`` folder contains standalone scripts for
-integration-style tests that don't fit the unit-test pattern (e.g.
-end-to-end notification flow).
+The ``new_tests/`` folder contains Jest test suites organised by user
+requirement, with a pair of files per UR — one unit test file and one
+integration test file (e.g. ``ur1-unit.test.js`` and
+``ur1-integration.test.js``).
 
-See the project repository for instructions on running tests:
+Integration tests import ``app.js`` directly rather than starting an
+HTTP server, and run against a separate test database that is
+populated by ``node_scripts/install_test_db.js`` before each test run.
 
-https://github.com/SETAP-Org/group-coursework-management-system
+Two scripts are available for running tests:
+
+- ``npm test`` — runs a focused subset of tests with coverage
+- ``npm run test-all`` — runs every test file in ``new_tests/`` with coverage
+
+Both scripts set ``NODE_ENV=test``, which activates the auth bypass
+middleware in ``app.js`` so integration tests can hit authenticated
+routes without going through the full OAuth flow.
