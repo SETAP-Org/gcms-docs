@@ -8,7 +8,7 @@ before running the application.
 Required files
 --------------
 
-Place all six files in the **project root** alongside ``server.js``:
+Place the following files in the **project root** alongside ``server.js``:
 
 ``.env.development``
    Supabase connection string and storage configuration for the
@@ -17,6 +17,10 @@ Place all six files in the **project root** alongside ``server.js``:
 ``.env.production``
    Supabase connection string and storage configuration for the
    production database. Used when running ``npm run prod``.
+
+``.env.test``
+   Connection details for the test database. Used when running
+   ``npm test`` or ``npm run test-all`` (which set ``NODE_ENV=test``).
 
 ``.env.auth``
    Microsoft Azure OAuth credentials, including ``CLIENT_ID`` and
@@ -37,7 +41,7 @@ Expected variables
 
 The following variables are read from each file:
 
-``.env.development`` / ``.env.production``
+``.env.development`` / ``.env.production`` / ``.env.test``
    - ``DB_URL`` — full PostgreSQL connection string for the
      ``node-postgres`` pool
    - ``SUPABASE_URL`` — Supabase project URL
@@ -63,6 +67,13 @@ The following variables are read from each file:
    - ``MAILTRAP_PASS`` — SMTP password
    - ``EMAIL_FROM`` — optional sender address
 
+Optional variables
+~~~~~~~~~~~~~~~~~~
+
+``MAX_UPLOAD_BYTES``
+   Override for the maximum file size allowed in shared folder uploads.
+   Defaults to ``10485760`` (10 MB) if not set.
+
 Obtaining credentials
 ---------------------
 
@@ -73,8 +84,9 @@ run the application locally.
 If you are setting up GCMS independently, you will need to provision
 your own resources:
 
-- A Supabase project, with a Storage bucket created and the schema
-  applied (see :doc:`database-setup`)
+- One or more Supabase projects (development, production, and test),
+  with a Storage bucket created in each and the schema applied
+  (see :doc:`database-setup`)
 - An Azure App Registration with the required scopes
   (see :doc:`/external-integrations/index`)
 - A Google AI Studio API key for Gemini access
