@@ -15,5 +15,6 @@ Group Coursework Management System (GCMS) Documentation
    database-schema/index
    api-reference/index
    external-integrations/index
+   testing/index
    troubleshooting
    contributing
