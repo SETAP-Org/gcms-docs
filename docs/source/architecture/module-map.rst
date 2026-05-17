@@ -50,8 +50,8 @@ utilities.
        end
 
        subgraph Scripts["Client Scripts (public/scripts/)"]
-           SUtil["utils.js<br/>(shared helpers)"]
-           SLD["L&D-mode.js<br/>(light/dark)"]
+           SUtil["utils.js (shared helpers)"]
+           SLD["LD-mode.js (light/dark)"]
            SCook["cookieBanner.js"]
            SNav["userNav / projectNav"]
            SWel["welcome.js"]
@@ -61,7 +61,7 @@ utilities.
            SKonva["konva-dash.js"]
            SPInfo["projectInfo.js"]
            STask["projectTasks.js"]
-           SCal["projectCalendar.js<br/>loadCalandar.js"]
+           SCal["projectCalendar.js + loadCalandar.js"]
            SChat["projectChat.js"]
            SCont["projectContributions.js"]
            SFiles["projectFiles.js"]
@@ -70,9 +70,9 @@ utilities.
        end
 
        subgraph Styles["Stylesheets (public/css/)"]
-           CSSRoot["root-light.css / root-dark.css<br/>(theme tokens)"]
-           CSSBase["styles.css / header_style.css /<br/>footer.css (global)"]
-           CSSPage["Per-page CSS files<br/>(project_chat.css, project_tasks.css, ...)"]
+           CSSRoot["root-light.css + root-dark.css (theme tokens)"]
+           CSSBase["styles.css + header_style.css + footer.css (global)"]
+           CSSPage["Per-page CSS files (project_chat.css, project_tasks.css, ...)"]
        end
 
        Pages -.embeds.-> Partials
