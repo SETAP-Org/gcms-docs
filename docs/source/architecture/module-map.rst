@@ -93,12 +93,12 @@ utilities.
        classDef view fill:#e8f0fe,stroke:#1a73e8,color:#000
        classDef partial fill:#fef7e0,stroke:#f9a825,color:#000
        classDef script fill:#e8f5e9,stroke:#2e7d32,color:#000
-       classDef style fill:#fce4ec,stroke:#c2185b,color:#000
+       classDef cssfile fill:#fce4ec,stroke:#c2185b,color:#000
 
        class VLand,VWel,VUDash,VProf,VProj,VPDash,VPInfo,VPTask,VPCal,VPChat,VPCont,VPFiles,VErr view
        class PNav,PNot,PAI,PFoot,PCook,PLoad,PFiles partial
        class SUtil,SLD,SCook,SNav,SWel,SUDash,SProf,SProj,SKonva,SPInfo,STask,SCal,SChat,SCont,SFiles,SAI,SErr script
-       class CSSRoot,CSSBase,CSSPage style
+       class CSSRoot,CSSBase,CSSPage cssfile
 
 Backend module map
 ------------------
@@ -118,7 +118,7 @@ on each connection.
            Socket["utils/socket.js"]
        end
 
-       subgraph Routes["Routes (routes/)"]
+       subgraph Routes["Routes"]
            Rpage["pageRoutes"]
            Rauth["authRoutes"]
            Ruser["userRoutes"]
@@ -132,7 +132,7 @@ on each connection.
            Rai["aiRoutes"]
        end
 
-       subgraph Controllers["Controllers (controllers/)"]
+       subgraph Controllers["Controllers"]
            Cserve["serveControllers<br/>serveLanding, serveProjectDash,<br/>serveProjectTasks, ..."]
            Cauth["authControllers<br/>checkIfLoggedIn, signOut,<br/>authenticatePassport"]
            Cuser["userControllers<br/>addUser, updateUsername,<br/>getCurrentUserPhoto"]
@@ -147,7 +147,7 @@ on each connection.
            Cai["aiChatControllers<br/>postAiChatMessage,<br/>getAiChatMessages, clearAiChatHistory"]
        end
 
-       subgraph Models["Models (models/)"]
+       subgraph Models["Models"]
            Muser["userModels"]
            Mproj["projectModels"]
            Muproj["userProjectModels"]
@@ -191,9 +191,9 @@ on each connection.
        Rfile --> Cfile
        Rai --> Cai
 
-       Socket -->|chat:send| Cnotif
-       Socket -->|task:update| Ctask
-       Socket -->|widget:update| Ckonva
+       Socket -->|chat send| Cnotif
+       Socket -->|task update| Ctask
+       Socket -->|widget update| Ckonva
 
        Cserve --> Mproj
        Cserve --> Muser
@@ -239,21 +239,21 @@ controllers calling them.
            Cai["aiChatControllers"]
            Cfile["fileControllers"]
            Cnotif["notificationControllers"]
-           Cother["(other controllers)"]
+           Cother["other controllers"]
        end
 
-       subgraph Utils["Utilities (utils/)"]
-           Uauth["auth.js<br/>(Passport strategy)"]
-           Usup["supabase.js<br/>(pg pool + storage client)"]
-           Ugem["gemini.js<br/>(AI client)"]
-           Ufile["fileFetcher.js<br/>(download + extract text)"]
-           Uemail["emailSender.js<br/>(Nodemailer)"]
-           Uconf["emailConfig.js<br/>(SMTP config)"]
+       subgraph Utils["Utilities"]
+           Uauth["auth.js (Passport strategy)"]
+           Usup["supabase.js (pg pool + storage client)"]
+           Ugem["gemini.js (AI client)"]
+           Ufile["fileFetcher.js (download + extract text)"]
+           Uemail["emailSender.js (Nodemailer)"]
+           Uconf["emailConfig.js (SMTP config)"]
        end
 
        subgraph DB["Data Stores"]
-           PG[("PostgreSQL<br/>(via pg pool)")]
-           Bucket[("Supabase Storage<br/>Bucket")]
+           PG[("PostgreSQL via pg pool")]
+           Bucket[("Supabase Storage Bucket")]
        end
 
        subgraph External["External Services"]
@@ -263,16 +263,16 @@ controllers calling them.
        end
 
        Cauth -->|authenticatePassport| Uauth
-       Uauth -->|OAuth + /me| MS
+       Uauth -->|OAuth + me| MS
 
-       Ccal -->|getEvent / addEvent /<br/>removeEvent| MS
+       Ccal -->|getEvent, addEvent, removeEvent| MS
        Cuser -->|getCurrentUserPhoto| MS
 
        Cother -.via models.-> Usup
        Usup -->|SQL queries| PG
 
-       Cfile -->|initFileUpload<br/>getDownloadUrl<br/>deleteFile| Usup
-       Usup -->|signed URLs<br/>storage ops| Bucket
+       Cfile -->|initFileUpload, getDownloadUrl, deleteFile| Usup
+       Usup -->|signed URLs, storage ops| Bucket
 
        Cai -->|postAiChatMessage| Ugem
        Cai -->|fetch attached files| Ufile
@@ -296,9 +296,9 @@ controllers calling them.
 How to read these diagrams
 --------------------------
 
-- **Function names on connection labels** indicate which exported
-  functions in the source module call which functions in the target
-  module — not an exhaustive list, but the most representative ones
+- **Function names in node labels** indicate which exported
+  functions live in that module — not always an exhaustive list,
+  but the most representative ones
 - **Solid arrows** are direct function calls or HTTP/socket transport
 - **Dashed arrows** are "uses" or "embeds" relationships rather than
   direct invocation
