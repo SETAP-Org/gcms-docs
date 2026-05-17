@@ -1,12 +1,6 @@
 Architecture
 ============
 
-.. toctree::
-   :maxdepth: 1
-   :hidden:
-
-   module-map
-
 GCMS is built as a layered Node.js application following a classic
 Model-Controller pattern, served by Express with real-time updates
 powered by Socket.io. This page documents the major components, how
