@@ -1,9 +1,9 @@
 Running Tests
 =============
 
-GCMS exposes two NPM scripts for running tests. Both set
-``NODE_ENV=test`` automatically and reset the test database before
-running.
+GCMS exposes a single NPM script for running the full test suite,
+plus two helper scripts for triggering email and notification flows
+manually.
 
 Prerequisites
 -------------
@@ -22,53 +22,67 @@ Available scripts
 ``npm test``
 ~~~~~~~~~~~~
 
-Runs a focused subset of tests with coverage reporting. Currently
-configured to run the UR-11 unit and integration tests as a smoke
-test before the full suite.
+Runs every test file in ``new_tests/`` with coverage reporting,
+after resetting the test database from scratch.
 
 ::
 
    npm test
 
-Use this when you want quick feedback during development.
+The script does three things in order:
 
-``npm run test-all``
-~~~~~~~~~~~~~~~~~~~~
-
-Runs every test file in ``new_tests/`` with coverage reporting.
-
-::
-
-   npm run test-all
-
-Use this before pushing changes or opening a pull request, to confirm
-nothing has regressed across the full suite.
-
-How the scripts work
---------------------
-
-Both scripts perform the same three-step process:
-
-1. ``cross-env NODE_ENV=test`` — sets the environment so that
+1. ``cross-env NODE_ENV=test node node_scripts/install_test_db.js``
+   — drops and recreates the test database, then applies
+   ``db/schema.sql`` and ``db/seed_dev.sql``
+2. ``cross-env NODE_ENV=test`` — sets the environment so that
    ``app.js`` loads ``.env.test`` and installs the auth bypass
    middleware
-2. ``node node_scripts/install_test_db.js`` — drops and recreates the
-   test database, then applies ``db/schema.sql`` and ``db/seed_dev.sql``
-3. ``jest --runInBand --forceExit --coverage`` — runs the test files
+3. ``jest --runInBand --coverage`` — runs the test files
    sequentially (avoiding database contention) and generates a
-   coverage report
+   coverage report, excluding model files, scripts, and static
+   client-side code from coverage measurement
+
+Manual flow scripts
+-------------------
+
+In addition to the automated test suite, two NPM scripts trigger
+specific real-world flows for manual verification. These do not run
+under Jest and do not produce a coverage report.
+
+``npm run email:test``
+~~~~~~~~~~~~~~~~~~~~~~
+
+Runs ``testEmail.mjs``, which sends a sample notification email via
+Mailtrap using the credentials in ``.env.mailconfig``. Use this to
+verify that SMTP credentials are valid without going through the
+full notification trigger path.
+
+``npm run notification:test``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Runs ``testNotification.mjs``, which exercises the end-to-end
+notification flow including database insertion, Socket.io emission,
+and email delivery. Useful when validating that all parts of the
+notification pipeline are wired correctly.
 
 Coverage report
 ---------------
 
-After a test run, Jest writes a coverage report to ``coverage/`` in
-the project root. Open ``coverage/lcov-report/index.html`` in a
-browser for an interactive view of which lines and branches were
-exercised by the test suite.
+After ``npm test`` runs, Jest writes a coverage report to
+``coverage/`` in the project root. Open
+``coverage/lcov-report/index.html`` in a browser for an interactive
+view of which lines and branches were exercised by the test suite.
 
 Coverage is reported per file and per metric (statements, branches,
 functions, lines). Aim for at least 80% line coverage on any new
 controller you add.
+
+The following are intentionally excluded from coverage measurement:
+
+- ``models/`` — covered by integration tests rather than unit tests
+- ``node_scripts/`` — standalone setup utilities
+- ``listen.js`` — single-line server boot
+- ``public/scripts/`` — client-side JS, not in scope for backend testing
 
 Troubleshooting
 ---------------
@@ -84,9 +98,8 @@ PostgreSQL users may need elevated privileges).
 If integration tests hang
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Jest may be waiting on an open database connection. The ``--forceExit``
-flag in the scripts should prevent this, but if you have added a new
-integration test, make sure any open connections or sockets are
+Jest may be waiting on an open database connection or socket. If you
+have added a new integration test, make sure any open resources are
 closed in an ``afterAll`` hook.
 
 If unit tests can't find a mock
