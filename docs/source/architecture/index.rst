@@ -246,20 +246,7 @@ GCMS integrates with four external services. See
 Testing
 -------
 
-The ``new_tests/`` folder contains Jest test suites organised by user
-requirement, with a pair of files per UR — one unit test file and one
-integration test file (e.g. ``ur1-unit.test.js`` and
-``ur1-integration.test.js``).
-
-Integration tests import ``app.js`` directly rather than starting an
-HTTP server, and run against a separate test database that is
-populated by ``node_scripts/install_test_db.js`` before each test run.
-
-Two scripts are available for running tests:
-
-- ``npm test`` — runs a focused subset of tests with coverage
-- ``npm run test-all`` — runs every test file in ``new_tests/`` with coverage
-
-Both scripts set ``NODE_ENV=test``, which activates the auth bypass
-middleware in ``app.js`` so integration tests can hit authenticated
-routes without going through the full OAuth flow.
+GCMS has a dedicated automated test suite with both unit and
+integration coverage. See :doc:`/testing/index` for the full
+testing strategy, how to run tests, and conventions for writing
+new ones.
